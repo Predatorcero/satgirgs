@@ -7,3 +7,4 @@ endif()
 # Example applications
 add_subdirectory(gengirg)
 add_subdirectory(genhrg)
+add_subdirectory(gensatgirg)
