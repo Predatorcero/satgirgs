@@ -10,8 +10,8 @@
 #include <omp.h>
 
 #include <girgs/girgs-version.h>
-#include <girgs/Generator.h>
-#include <girgs/BitManipulation.h>
+#include <satgirgs/Generator.h>
+#include <satgirgs/BitManipulation.h>
 
 
 using namespace std;
@@ -114,34 +114,34 @@ int main(int argc, char* argv[]) {
     logParam(file, "file");
     logParam(dot, "dot");
     logParam(edge, "edge");
-    logParam(girgs::BitManipulation<1>::name(), "morton");
+    logParam(satgirgs::BitManipulation<1>::name(), "morton");
     cout << "\n";
 
     auto t1 = high_resolution_clock::now();
 
 
     cout << "generating weights ...\t\t" << flush;
-    auto weights = girgs::generateWeights(n, ple, wseed, threads > 1);
+    auto weights = satgirgs::generateWeights(n, ple, wseed, threads > 1);
     auto t2 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t2 - t1).count() << "ms\tlargest = ";
     cout << *max_element(weights.begin(), weights.end()) << endl;
 
 
     cout << "generating non-clause positions ...\t" << flush;
-    auto nc_positions = girgs::generatePositions(n, d, ncseed);
+    auto nc_positions = satgirgs::generatePositions(n, d, ncseed);
     auto t3 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t3 - t2).count() << "ms" << endl;
 
 
     cout << "generating clause positions ...\t\t" << flush;
-    auto c_positions = girgs::generatePositions(m, d, cseed);
+    auto c_positions = satgirgs::generatePositions(m, d, cseed);
     auto t4 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t4 - t3).count() << "ms" << endl;
 
     cout << "sampling edges ...\t\t" << flush;
     // TODO write generator code and replace
     // TODO second generator method for graph with connected clause points
-    auto edges = girgs::generateEdges(weights, nc_positions, alpha, sseed);
+    auto edges = satgirgs::generateEdges(weights, c_positions, nc_positions, alpha, sseed);
     auto t5 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t5 - t4).count() << "ms\tavg deg = " << edges.size()*2.0/n << endl;
 
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
     if (dot) {
         cout << "writing .dot file ...\t\t" << flush;
         auto t6 = high_resolution_clock::now();
-        girgs::saveDot(weights, nc_positions, edges, file+".dot");
+        satgirgs::saveDot(weights, nc_positions, edges, file+".dot");
         auto t7 = high_resolution_clock::now();
         cout << "done in " << duration_cast<milliseconds>(t7 - t6).count() << "ms" << endl;
     }

@@ -52,8 +52,8 @@ std::vector<std::vector<double>> generatePositions(int n, int dimension, int pos
     return result;
 }
 
-std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weights, const std::vector<std::vector<double>> &positions,
-        double alpha, int samplingSeed) {
+std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weights, const std::vector<std::vector<double>> &c_positions,
+        const std::vector<std::vector<double>> &nc_positions, double alpha, int samplingSeed) {
 
     using edge_vector = std::vector<std::pair<int, int>>;
     edge_vector result;
@@ -80,14 +80,14 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weight
         }
     };
 
-    auto dimension = positions.front().size();
+    auto dimension = nc_positions.front().size();
 
     switch(dimension) {
-        case 1: makeSpatialTree<1>(weights, positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 2: makeSpatialTree<2>(weights, positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 3: makeSpatialTree<3>(weights, positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 4: makeSpatialTree<4>(weights, positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 5: makeSpatialTree<5>(weights, positions, alpha, addEdge).generateEdges(samplingSeed); break;
+        case 1: makeSpatialTree<1>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
+        case 2: makeSpatialTree<2>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
+        case 3: makeSpatialTree<3>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
+        case 4: makeSpatialTree<4>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
+        case 5: makeSpatialTree<5>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
         default:
             std::cout << "Dimension " << dimension << " not supported." << std::endl;
             std::cout << "No edges generated." << std::endl;

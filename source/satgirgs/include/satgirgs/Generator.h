@@ -84,8 +84,8 @@ SATGIRGS_API double scaleWeights(std::vector<double>& weights, double desiredAvg
  * @return
  *  An edge list with zero based indices.
  */
-SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<double>& weights, const std::vector<std::vector<double>>& positions,
-        double alpha, int samplingSeed);
+SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<double>& weights, const std::vector<std::vector<double>>& c_positions,
+        const std::vector<std::vector<double>> &nc_positions, double alpha, int samplingSeed);
 
 
 /**
