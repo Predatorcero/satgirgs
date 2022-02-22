@@ -10,7 +10,6 @@
 
 #include <satgirgs/Generator.h>
 #include <satgirgs/SpatialTree.h>
-#include <satgirgs/WeightScaling.h>
 
 
 namespace satgirgs {
@@ -51,22 +50,6 @@ std::vector<std::vector<double>> generatePositions(int n, int dimension, int pos
     }
 
     return result;
-}
-
-double scaleWeights(std::vector<double>& weights, double desiredAvgDegree, int dimension, double alpha) {
-    // estimate scaling with binary search
-    double scaling;
-    if(alpha > 8.0)
-        scaling = estimateWeightScalingThreshold(weights, desiredAvgDegree, dimension);
-    else if(alpha > 0.0 && alpha != 1.0)
-        scaling = estimateWeightScaling(weights, desiredAvgDegree, dimension, alpha);
-    else
-        throw("I do not know how to scale weights for desired alpha :(");
-
-    // scale weights
-    for(auto& each : weights)
-        each *= scaling;
-    return scaling;
 }
 
 std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weights, const std::vector<std::vector<double>> &positions,
