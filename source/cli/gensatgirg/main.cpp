@@ -11,7 +11,6 @@
 
 #include <girgs/girgs-version.h>
 #include <satgirgs/Generator.h>
-#include <satgirgs/BitManipulation.h>
 
 
 using namespace std;
@@ -111,7 +110,6 @@ int main(int argc, char* argv[]) {
     logParam(dot, "dot");
     logParam(edge, "edge");
     logParam(debug, "debugMode");
-    logParam(satgirgs::BitManipulation<1>::name(), "morton");
     cout << "\n";
 
     auto t1 = high_resolution_clock::now();

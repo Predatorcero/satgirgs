@@ -9,7 +9,6 @@
 #include <omp.h>
 
 #include <satgirgs/Generator.h>
-#include <satgirgs/SpatialTree.h>
 
 
 namespace satgirgs {
@@ -21,7 +20,7 @@ std::vector<double> generateWeights(int n, double ple, int weightSeed, bool para
     #pragma omp parallel num_threads(threads)
     {
         const auto tid = omp_get_thread_num();
-        auto gen = default_random_engine{weightSeed >= 0 ? (weightSeed+tid) : std::random_device()()};
+        auto gen = std::default_random_engine{weightSeed >= 0 ? (weightSeed+tid) : std::random_device()()};
         auto dist = std::uniform_real_distribution<>{};
 
         #pragma omp for schedule(static)
@@ -40,7 +39,7 @@ std::vector<std::vector<double>> generatePositions(int n, int dimension, int pos
     #pragma omp parallel num_threads(threads)
     {
         const auto tid = omp_get_thread_num();
-        auto gen = default_random_engine{positionSeed >= 0 ? (positionSeed+tid) : std::random_device()()};
+        auto gen = std::default_random_engine{positionSeed >= 0 ? (positionSeed+tid) : std::random_device()()};
         auto dist = std::uniform_real_distribution<>{};
 
         #pragma omp for schedule(static)
@@ -91,8 +90,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 
     const auto num_threads = omp_get_max_threads();
 
-    // TODO convert c_positions/nc_positions to vector of Node and remove template from Node
-    // TODO does parallel work here?
+    // TODO does parallel work here reliably?
     #pragma omp parallel for num_threads(num_threads)
     for(int clauseIndex = 0; clauseIndex < c_nodes.size(); clauseIndex++){
         auto cp = c_nodes[clauseIndex];
@@ -105,7 +103,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 
         if(debugMode){
             // add clause - non-clause edges
-            //pad clauseIndex to distinguish from non-clause indices
+            // offset clauseIndex to distinguish from non-clause indices
             addEdge(nearestIndex, nc_nodes.size() + clauseIndex, threadId);
             addEdge(secondNearestIndex, nc_nodes.size() + clauseIndex, threadId); 
         } else {
