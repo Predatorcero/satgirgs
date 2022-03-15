@@ -4,6 +4,7 @@
 #include <string>
 
 #include <satgirgs/satgirgs_api.h>
+#include <satgirgs/Node.h>
 
 
 namespace satgirgs {
@@ -27,12 +28,10 @@ SATGIRGS_API std::vector<double> generateWeights(int n, double ple, int weightSe
 
 /**
  * @brief
- *  Samples d dimensional coordinates for n points on a torus \f$[0,1)^d\f$.
+ *  Samples 2 dimensional coordinates for n points on a torus \f$[0,1)^d\f$.
  *
  * @param n
  *  Size of the graph.
- * @param dimension
- *  Dimension of the geometry.
  * @param positionSeed
  *  Seed to sample the positions.
  *
@@ -43,49 +42,37 @@ SATGIRGS_API std::vector<std::vector<double>> generatePositions(int n, int dimen
 
 /**
  * @brief
- *  Scales all weights so that the expected average degree equals desiredAvgDegree.
- *  Implemented as binary search over an estimation function.
+ *  Zips positions and weights into one vector of 2-dimensional nodes. Both vectors should have the same length.
  *
- * @bug
- *  For \f$\alpha > 10\f$ we use the estimation for threshold graphs due to numerical difficulties.
- *  This leads to slightly higher degrees than desired.
- *  Also I experienced inaccurate results for \f$9 \leq \alpha < 10\f$.
- *
+ * @param positions
+ *  Node positions
  * @param weights
- *  The weights to be modified.
- * @param desiredAvgDegree
- *  The desired average degree.
- * @param dimension
- *  Dimension of the underlying geometry. Should equal the dimensionality of the positions.
- * @param alpha
- *  Parameter of the algorithm. Should be the same as for the generation process.
+ *  Node weights (power-law distributed)
+ * @param indiceOffset
+ *  Offset for incides to distinguish clause and non-clause nodes
  *
  * @return
- *  The scaling s applied to all weights.
- *  The constant c hidden in the theta of the edge probabilities is \f$s^\alpha\f$ for \f$\alpha < \infty\f$
- *  and \f$s^{1/d}\f$ in the threshold case.
+ *  Node vector with the positions and weights given.
  */
-SATGIRGS_API double scaleWeights(std::vector<double>& weights, double desiredAvgDegree, int dimension, double alpha);
+SATGIRGS_API std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, std::vector<double> weights, int indiceOffset = 0);
 
 /**
  * @brief
  *  Samples edges according to weights and positions.
  *  An edge between node u and v is formed with probability \f$ \left(\frac{w_u w_v / W}{|| x_u - x_v ||^d}\right)^\alpha \f$ or 1.0 if the term exceeds 1.0.
  *
- * @param weights
- *  Power law distributed weights.
- * @param positions
- *  Positions on a torus. All inner vectors should have the same length indicating the dimension of the torus.
- * @param alpha
- *  Edge probability parameter.
- * @param samplingSeed
- *  Seed to sample the edges.
+ * @param c_nodes
+ *  Clause nodes
+ * @param nc_nodes
+ *  Non-clause nodes
+ * @param debugMode
+ *  Output edges between clause and two closest non-clauses instead of the edges between these non-clauses
  *
  * @return
  *  An edge list with zero based indices.
  */
-SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<double>& weights, const std::vector<std::vector<double>>& c_positions,
-        const std::vector<std::vector<double>> &nc_positions, double alpha, int samplingSeed);
+SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<Node2D>& c_nodes,
+        const std::vector<Node2D> &nc_nodes, bool debugMode = false);
 
 
 /**

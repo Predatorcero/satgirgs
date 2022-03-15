@@ -52,8 +52,17 @@ std::vector<std::vector<double>> generatePositions(int n, int dimension, int pos
     return result;
 }
 
-std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weights, const std::vector<std::vector<double>> &c_positions,
-        const std::vector<std::vector<double>> &nc_positions, double alpha, int samplingSeed) {
+std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, std::vector<double> weights, int indiceOffset){
+    assert(positions.size() == weights.size());
+    std::vector<Node2D> result;
+    for(int i = 0; i < positions.size(); i++){
+        result.push_back(Node2D(positions[i], weights[i], indiceOffset + i));
+    }
+    return result;
+}
+
+std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_nodes,
+        const std::vector<Node2D> &nc_nodes, bool debugMode) {
 
     using edge_vector = std::vector<std::pair<int, int>>;
     edge_vector result;
@@ -80,18 +89,29 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weight
         }
     };
 
-    auto dimension = nc_positions.front().size();
+    const auto num_threads = omp_get_max_threads();
 
-    switch(dimension) {
-        case 1: makeSpatialTree<1>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 2: makeSpatialTree<2>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 3: makeSpatialTree<3>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 4: makeSpatialTree<4>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        case 5: makeSpatialTree<5>(weights, nc_positions, alpha, addEdge).generateEdges(samplingSeed); break;
-        default:
-            std::cout << "Dimension " << dimension << " not supported." << std::endl;
-            std::cout << "No edges generated." << std::endl;
-            break;
+    // TODO convert c_positions/nc_positions to vector of Node and remove template from Node
+    // TODO does parallel work here?
+    #pragma omp parallel for num_threads(num_threads)
+    for(int clauseIndex = 0; clauseIndex < c_nodes.size(); clauseIndex++){
+        auto cp = c_nodes[clauseIndex];
+        const auto threadId = omp_get_thread_num();
+
+        auto nearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {return a.weightedDistance(cp) < b.weightedDistance(cp);});
+        auto nearestIndex = std::distance(nc_nodes.begin(), nearest);
+        auto secondNearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {return (a != *nearest || b == *nearest) && a.weightedDistance(cp) < b.weightedDistance(cp);}); // ignore first minimum
+        auto secondNearestIndex = std::distance(nc_nodes.begin(), secondNearest);
+
+        if(debugMode){
+            // add clause - non-clause edges
+            //pad clauseIndex to distinguish from non-clause indices
+            addEdge(nearestIndex, nc_nodes.size() + clauseIndex, threadId);
+            addEdge(secondNearestIndex, nc_nodes.size() + clauseIndex, threadId); 
+        } else {
+            // add non-clause - non-clause edges
+            addEdge(nearestIndex, secondNearestIndex, threadId);
+        }
     }
 
     for(const auto& v : local_edges)
@@ -104,6 +124,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<double> &weight
 void saveDot(const std::vector<double> &weights, const std::vector<std::vector<double>> &positions,
              const std::vector<std::pair<int, int>> &graph, const std::string &file) {
 
+    // TODO adapt saveDot code for new model
     std::ofstream f{file};
     if(!f.is_open())
         throw std::runtime_error{"Error: failed to open file \"" + file + '\"'};

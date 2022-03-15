@@ -25,6 +25,14 @@ struct Node {
         std::copy_n(_coord.cbegin(), D, coord.begin());
     }
 
+    inline bool operator==(const Node& other) const {
+        return index == other.index;
+    };
+
+    inline bool operator!=(const Node& other) const {
+        return index != other.index;
+    }
+
     double distance(const Node& other) const {
         auto result = 0.0;
         for(auto d=0u; d<D; ++d){
@@ -35,6 +43,12 @@ struct Node {
         return result;
     }
 
+    // weighted distance clause - non-clause
+    double weightedDistance(const Node& other) const {
+        // TODO implement distance calculation
+        return distance(other);
+    }
+
     void prefetch() const noexcept {
 #if defined(__GNUC__) || defined(__clang__)
         __builtin_prefetch(coord.data(), 0);
@@ -43,5 +57,7 @@ struct Node {
     }
 };
 
+typedef Node<2> Node2D;
 
-} // namespace girgs
+
+} // namespace satgirgs

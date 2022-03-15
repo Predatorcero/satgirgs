@@ -57,17 +57,16 @@ int main(int argc, char* argv[]) {
         clog << "usage: ./gensatgirg\n"
             << "\t\t[-n anInt]          // number of vertices (non-clause points)   default 10000\n"
             << "\t\t[-m anInt]          // number of edges (clause points)          default 10000\n"
-            << "\t\t[-d anInt]          // dimension of geometry    range [1,5]     default 2\n"
             << "\t\t[-ple aFloat]       // power law exponent       range (2,3]     default 2.5\n"
             << "\t\t[-alpha aFloat]     // model parameter          range (1,inf]   default infinity\n"
             << "\t\t[-wseed anInt]      // weight seed                              default 12\n"
             << "\t\t[-ncseed anInt]     // non-clause position seed                 default 130\n"
             << "\t\t[-cseed anInt]      // clause position seed                     default 130\n"
-            << "\t\t[-sseed anInt]      // sampling seed                            default 1400\n"
             << "\t\t[-threads anInt]    // number of threads to use                 default 1\n"
             << "\t\t[-file aString]     // file name for output (w/o ext)           default \"graph\"\n"
             << "\t\t[-dot 0|1]          // write result as dot (.dot)               default 0\n"
-            << "\t\t[-edge 0|1]         // write result as edgelist (.txt)          default 0\n";
+            << "\t\t[-edge 0|1]         // write result as edgelist (.txt)          default 0\n"
+            << "\t\t[-debug 0|1]         // output debug graph                      default 0\n";
         return 0;
     }
 
@@ -86,34 +85,32 @@ int main(int argc, char* argv[]) {
     auto params = parseArgs(argc, argv);
     auto n      = !params["n"    ].empty()  ? stoi(params["n"    ]) : 10000;
     auto m      = !params["m"    ].empty()  ? stoi(params["m"    ]) : 10000; // TODO find sensible default and change in usage above
-    auto d      = !params["d"    ].empty()  ? stoi(params["d"    ]) : 2;
     auto ple    = !params["ple"  ].empty()  ? stod(params["ple"  ]) : 2.5;
     auto alpha  = !params["alpha"].empty()  ? stod(params["alpha"]) : std::numeric_limits<double>::infinity();
     auto wseed  = !params["wseed"].empty()  ? stoi(params["wseed"]) : 12;
     auto ncseed = !params["ncseed"].empty() ? stoi(params["ncseed"]): 130;
     auto cseed  = !params["cseed"].empty()  ? stoi(params["cseed"]) : 130;
-    auto sseed  = !params["sseed"].empty()  ? stoi(params["sseed"]) : 1400;
     auto threads= !params["threads"].empty()? stoi(params["threads"]) : 1;
     auto file   = !params["file" ].empty()  ? params["file"] : "graph";
     auto dot    = params["dot" ] == "1";
     auto edge   = params["edge"] == "1";
+    auto debug  = params["debug"] == "1";
 
     // log params and range checks
     cout << "using:\n";
     logParam(n, "n");
     logParam(m, "m");
-    rangeCheck(d, 1, 5, "d");
     rangeCheck(ple, 2.0, 3.0, "ple", true, false);
     rangeCheck(alpha, 1.0, std::numeric_limits<double>::infinity(), "alpha", true);
     logParam(wseed, "wseed");
     logParam(ncseed, "ncseed");
     logParam(cseed, "cseed");
-    logParam(sseed, "sseed");
     rangeCheck(threads, 1, omp_get_max_threads(), "threads");
     omp_set_num_threads(threads);
     logParam(file, "file");
     logParam(dot, "dot");
     logParam(edge, "edge");
+    logParam(debug, "debugMode");
     logParam(satgirgs::BitManipulation<1>::name(), "morton");
     cout << "\n";
 
@@ -128,24 +125,28 @@ int main(int argc, char* argv[]) {
 
 
     cout << "generating non-clause positions ...\t" << flush;
-    auto nc_positions = satgirgs::generatePositions(n, d, ncseed);
+    auto nc_positions = satgirgs::generatePositions(n, 2, ncseed);
+    auto nc_nodes = satgirgs::convertToNodes(nc_positions, weights);
     auto t3 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t3 - t2).count() << "ms" << endl;
 
 
     cout << "generating clause positions ...\t\t" << flush;
-    auto c_positions = satgirgs::generatePositions(m, d, cseed);
+    auto c_positions = satgirgs::generatePositions(m, 2, cseed);
+    std::vector<double> c_pseudoweights(m, 1);
+    auto c_nodes = satgirgs::convertToNodes(c_positions, c_pseudoweights);
     auto t4 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t4 - t3).count() << "ms" << endl;
 
     cout << "sampling edges ...\t\t" << flush;
-    // TODO write generator code and replace
-    // TODO second generator method for graph with connected clause points
-    auto edges = satgirgs::generateEdges(weights, c_positions, nc_positions, alpha, sseed);
+    auto edges = satgirgs::generateEdges(c_nodes, nc_nodes);
+    if(debug) {
+        auto debug_edges = satgirgs::generateEdges(c_nodes, nc_nodes, true);
+    }
     auto t5 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t5 - t4).count() << "ms\tavg deg = " << edges.size()*2.0/n << endl;
 
-    // TODO adapt output code for new model
+    // TODO adapt saveDot code for new model
     if (dot) {
         cout << "writing .dot file ...\t\t" << flush;
         auto t6 = high_resolution_clock::now();
