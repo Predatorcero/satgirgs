@@ -30,10 +30,6 @@ struct Node {
         return index == other.index;
     };
 
-    inline bool operator!=(const Node& other) const {
-        return index != other.index;
-    }
-
     double distance(const Node& other) const {
         auto result = 0.0;
         for(auto d=0u; d<D; ++d){

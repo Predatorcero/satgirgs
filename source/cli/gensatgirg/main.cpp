@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
             << "\t\t[-alpha aFloat]     // model parameter          range (1,inf]   default infinity\n"
             << "\t\t[-wseed anInt]      // weight seed                              default 12\n"
             << "\t\t[-ncseed anInt]     // non-clause position seed                 default 130\n"
-            << "\t\t[-cseed anInt]      // clause position seed                     default 130\n"
+            << "\t\t[-cseed anInt]      // clause position seed                     default 420\n"
             << "\t\t[-threads anInt]    // number of threads to use                 default 1\n"
             << "\t\t[-file aString]     // file name for output (w/o ext)           default \"graph\"\n"
             << "\t\t[-dot 0|1]          // write result as dot (.dot)               default 0\n"
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     auto alpha  = !params["alpha"].empty()  ? stod(params["alpha"]) : std::numeric_limits<double>::infinity();
     auto wseed  = !params["wseed"].empty()  ? stoi(params["wseed"]) : 12;
     auto ncseed = !params["ncseed"].empty() ? stoi(params["ncseed"]): 130;
-    auto cseed  = !params["cseed"].empty()  ? stoi(params["cseed"]) : 130;
+    auto cseed  = !params["cseed"].empty()  ? stoi(params["cseed"]) : 420;
     auto threads= !params["threads"].empty()? stoi(params["threads"]) : 1;
     auto file   = !params["file" ].empty()  ? params["file"] : "graph";
     auto dot    = params["dot" ] == "1";

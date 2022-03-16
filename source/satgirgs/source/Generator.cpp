@@ -97,18 +97,20 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
         const auto threadId = omp_get_thread_num();
 
         auto nearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {return a.weightedDistance(cp) < b.weightedDistance(cp);});
-        auto nearestIndex = std::distance(nc_nodes.begin(), nearest);
-        auto secondNearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {return (a != *nearest || b == *nearest) && a.weightedDistance(cp) < b.weightedDistance(cp);}); // ignore first minimum
-        auto secondNearestIndex = std::distance(nc_nodes.begin(), secondNearest);
+        auto secondNearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {
+            if(a == *nearest) return false;
+            if(b == *nearest) return true;
+            return a.weightedDistance(cp) < b.weightedDistance(cp);
+        }); // ignore first minimum
 
         if(debugMode){
             // add clause - non-clause edges
             // offset clauseIndex to distinguish from non-clause indices
-            addEdge(nearestIndex, nc_nodes.size() + clauseIndex, threadId);
-            addEdge(secondNearestIndex, nc_nodes.size() + clauseIndex, threadId); 
+            addEdge(nearest->index, nc_nodes.size() + clauseIndex, threadId);
+            addEdge(secondNearest->index, nc_nodes.size() + clauseIndex, threadId); 
         } else {
             // add non-clause - non-clause edges
-            addEdge(nearestIndex, secondNearestIndex, threadId);
+            addEdge(nearest->index, secondNearest->index, threadId);
         }
     }
 
@@ -128,16 +130,17 @@ void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_n
     f << "graph girg {\n\toverlap=scale;\n\n";
     f << std::fixed;
     for (int i = 0; i < nc_nodes.size(); ++i) {
-        f << '\t' << i << " [label=\""
+        f << '\t' << nc_nodes[i].index << " [label=\""
           << std::setprecision(2) << nc_nodes[i].weight << std::setprecision(6)
           << "\", pos=\"";
         for (auto d = 0u; d < nc_nodes[i].coord.size(); ++d)
             f << (d == 0 ? "" : ",") << nc_nodes[i].coord[d];
         f << "\"];\n";
     }
+    f << std::fixed;
     if(debugMode){
         for (int i = 0; i < c_nodes.size(); ++i) {
-            f << '\t' << i << " [color=\"red\",style=\"filled\", label=\""
+            f << '\t' << c_nodes[i].index << " [color=\"red\",style=\"filled\", label=\""
             << std::setprecision(2) << c_nodes[i].weight << std::setprecision(6)
             << "\", pos=\"";
             for (auto d = 0u; d < c_nodes[i].coord.size(); ++d)
