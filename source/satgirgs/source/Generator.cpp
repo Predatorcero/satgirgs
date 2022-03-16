@@ -60,6 +60,7 @@ std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, s
     return result;
 }
 
+// we could make this more efficient using a k-d-tree (refer to https://rosettacode.org/wiki/K-d_tree#C.2B.2B for this)
 std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_nodes,
         const std::vector<Node2D> &nc_nodes, bool debugMode) {
 
@@ -90,8 +91,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 
     const auto num_threads = omp_get_max_threads();
 
-    // TODO does parallel work here reliably?
-    #pragma omp parallel for num_threads(num_threads)
+    #pragma omp parallel for schedule(static), num_threads(num_threads)
     for(int clauseIndex = 0; clauseIndex < c_nodes.size(); clauseIndex++){
         auto cp = c_nodes[clauseIndex];
         const auto threadId = omp_get_thread_num();
@@ -119,22 +119,31 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 }
 
 
-void saveDot(const std::vector<double> &weights, const std::vector<std::vector<double>> &positions,
-             const std::vector<std::pair<int, int>> &graph, const std::string &file) {
+void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_nodes,
+             const std::vector<std::pair<int, int>> &graph, const std::string &file, bool debugMode) {
 
-    // TODO adapt saveDot code for new model
     std::ofstream f{file};
     if(!f.is_open())
         throw std::runtime_error{"Error: failed to open file \"" + file + '\"'};
     f << "graph girg {\n\toverlap=scale;\n\n";
     f << std::fixed;
-    for (int i = 0; i < weights.size(); ++i) {
+    for (int i = 0; i < nc_nodes.size(); ++i) {
         f << '\t' << i << " [label=\""
-          << std::setprecision(2) << weights[i] << std::setprecision(6)
+          << std::setprecision(2) << nc_nodes[i].weight << std::setprecision(6)
           << "\", pos=\"";
-        for (auto d = 0u; d < positions[i].size(); ++d)
-            f << (d == 0 ? "" : ",") << positions[i][d];
+        for (auto d = 0u; d < nc_nodes[i].coord.size(); ++d)
+            f << (d == 0 ? "" : ",") << nc_nodes[i].coord[d];
         f << "\"];\n";
+    }
+    if(debugMode){
+        for (int i = 0; i < c_nodes.size(); ++i) {
+            f << '\t' << i << " [color=\"red\",style=\"filled\", label=\""
+            << std::setprecision(2) << c_nodes[i].weight << std::setprecision(6)
+            << "\", pos=\"";
+            for (auto d = 0u; d < c_nodes[i].coord.size(); ++d)
+                f << (d == 0 ? "" : ",") << c_nodes[i].coord[d];
+            f << "\"];\n";
+        }
     }
     f << '\n';
     for (auto &edge : graph)

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include <math.h>
 
 
 namespace satgirgs {
@@ -44,9 +45,10 @@ struct Node {
     }
 
     // weighted distance clause - non-clause
+    // this assumes at least one of the weights is 1 (which applies to clause nodes)
+    // hack-y: this fixes D = 2 although it shouldn't
     double weightedDistance(const Node& other) const {
-        // TODO implement distance calculation
-        return distance(other);
+        return distance(other) / sqrt(weight * other.weight);
     }
 
     void prefetch() const noexcept {

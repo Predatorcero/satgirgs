@@ -132,23 +132,26 @@ int main(int argc, char* argv[]) {
     cout << "generating clause positions ...\t\t" << flush;
     auto c_positions = satgirgs::generatePositions(m, 2, cseed);
     std::vector<double> c_pseudoweights(m, 1);
-    auto c_nodes = satgirgs::convertToNodes(c_positions, c_pseudoweights);
+    auto c_nodes = satgirgs::convertToNodes(c_positions, c_pseudoweights, nc_nodes.size());
     auto t4 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t4 - t3).count() << "ms" << endl;
 
     cout << "sampling edges ...\t\t" << flush;
     auto edges = satgirgs::generateEdges(c_nodes, nc_nodes);
+    std::vector<std::pair<int,int>> debug_edges;
     if(debug) {
-        auto debug_edges = satgirgs::generateEdges(c_nodes, nc_nodes, true);
+        debug_edges = satgirgs::generateEdges(c_nodes, nc_nodes, true);
     }
     auto t5 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t5 - t4).count() << "ms\tavg deg = " << edges.size()*2.0/n << endl;
 
-    // TODO adapt saveDot code for new model
     if (dot) {
         cout << "writing .dot file ...\t\t" << flush;
         auto t6 = high_resolution_clock::now();
-        satgirgs::saveDot(weights, nc_positions, edges, file+".dot");
+        satgirgs::saveDot(c_nodes, nc_nodes, edges, file+".dot");
+        if(debug) {
+            satgirgs::saveDot(c_nodes, nc_nodes, debug_edges, file+"_debug.dot", true);
+        }
         auto t7 = high_resolution_clock::now();
         cout << "done in " << duration_cast<milliseconds>(t7 - t6).count() << "ms" << endl;
     }

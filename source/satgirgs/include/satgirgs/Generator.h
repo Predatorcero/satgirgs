@@ -62,11 +62,11 @@ SATGIRGS_API std::vector<Node2D> convertToNodes(std::vector<std::vector<double>>
  *  An edge between node u and v is formed with probability \f$ \left(\frac{w_u w_v / W}{|| x_u - x_v ||^d}\right)^\alpha \f$ or 1.0 if the term exceeds 1.0.
  *
  * @param c_nodes
- *  Clause nodes
+ *  Clause nodes.
  * @param nc_nodes
- *  Non-clause nodes
+ *  Non-clause nodes.
  * @param debugMode
- *  Output edges between clause and two closest non-clauses instead of the edges between these non-clauses
+ *  In debug mode, output edges between clause and two closest non-clauses instead of the edges between these non-clauses.
  *
  * @return
  *  An edge list with zero based indices.
@@ -80,17 +80,19 @@ SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<Nod
  *  Saves the graph in .dot format (graphviz).
  *  The weight is saved as a label and the coordinates as a position attribute for each Node.
  *
- * @param weights
- *  Power law distributed weights.
- * @param positions
- *  The positions on a torus.
+ * @param c_nodes
+ *  Clause nodes
+ * @param nc_nodes
+ *  Non-clause nodes
  * @param graph
  *  An edge list with zero based indices.
  * @param file
  *  The name of the output file.
+ * @param debugMode
+ *  In debug mode, also output clause nodes.
  */
-SATGIRGS_API void saveDot(const std::vector<double>& weights, const std::vector<std::vector<double>>& positions,
-        const std::vector<std::pair<int,int>> &graph, const std::string &file);
+SATGIRGS_API void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_nodes,
+        const std::vector<std::pair<int,int>> &graph, const std::string &file, bool debugMode = false);
 
 
 
