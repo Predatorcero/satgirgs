@@ -145,27 +145,37 @@ int main(int argc, char* argv[]) {
     auto t5 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t5 - t4).count() << "ms\tavg deg = " << edges.size()*2.0/n << endl;
 
+    cout << "deduplicating edges ...\t\t" << flush;
+    auto dedup_edges = satgirgs::deduplicateEdges(edges);
+    std::vector<std::tuple<int,int, int>> dedup_debug_edges;
+    if(debug) {
+        dedup_debug_edges = satgirgs::deduplicateEdges(debug_edges);
+    }
+    auto t6 = high_resolution_clock::now();
+    cout << "done in " << duration_cast<milliseconds>(t6 - t5).count() << "ms\tavg deg = " << dedup_edges.size()*2.0/n << endl;
+
     if (dot) {
         cout << "writing .dot file ...\t\t" << flush;
-        auto t6 = high_resolution_clock::now();
-        satgirgs::saveDot(c_nodes, nc_nodes, edges, file+".dot");
-        if(debug) {
-            satgirgs::saveDot(c_nodes, nc_nodes, debug_edges, file+"_debug.dot", true);
-        }
         auto t7 = high_resolution_clock::now();
-        cout << "done in " << duration_cast<milliseconds>(t7 - t6).count() << "ms" << endl;
+        satgirgs::saveDot(c_nodes, nc_nodes, dedup_edges, file+".dot");
+        if(debug) {
+            satgirgs::saveDot(c_nodes, nc_nodes, dedup_debug_edges, file+"_debug.dot", true);
+        }
+        auto t8 = high_resolution_clock::now();
+        cout << "done in " << duration_cast<milliseconds>(t8 - t7).count() << "ms" << endl;
     }
 
     if (edge) {
         cout << "writing edge list (.txt) ...\t" << flush;
-        auto t6 = high_resolution_clock::now();
+        auto t7 = high_resolution_clock::now();
         ofstream f{file+".txt"};
         if(!f.is_open()) throw std::runtime_error{"Error: failed to open file \"" + file + ".txt\""};
-        f << n << ' ' << edges.size() << "\n\n";
-        for(auto& each : edges)
-            f << each.first << ' ' << each.second << '\n';
-        auto t7 = high_resolution_clock::now();
-        cout << "done in " << duration_cast<milliseconds>(t7 - t6).count() << "ms" << endl;
+        f << n << ' ' << dedup_edges.size() << "\n\n";
+        int u, v, w;
+        for(const auto& [u, v, w] : dedup_edges)
+            f << u << ' ' << v << ' ' << w << '\n';
+        auto t8 = high_resolution_clock::now();
+        cout << "done in " << duration_cast<milliseconds>(t8 - t7).count() << "ms" << endl;
     }
 
     return 0;

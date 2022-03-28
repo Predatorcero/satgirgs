@@ -5,6 +5,7 @@
 #include <functional>
 #include <mutex>
 #include <ios>
+#include <tuple>
 
 #include <omp.h>
 
@@ -60,6 +61,26 @@ std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, s
     return result;
 }
 
+std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<std::pair<int, int>> &edges){
+    std::vector<std::tuple<int,int,int>> new_edges;
+    sort(edges.begin(), edges.end());
+
+    std::pair<int,int> last = edges[0];
+    int run_length = 0;
+    for(auto edge : edges){
+        if(edge == last){
+            run_length++;
+        } else {
+            int u, v;
+            std::tie(u, v) = last; 
+            new_edges.emplace_back(u, v, run_length);
+            run_length = 1;
+        }
+        last = edge;
+    }
+    return new_edges;
+}
+
 // we could make this more efficient using a k-d-tree (refer to https://rosettacode.org/wiki/K-d_tree#C.2B.2B for this)
 std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_nodes,
         const std::vector<Node2D> &nc_nodes, bool debugMode) {
@@ -82,6 +103,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 
     auto addEdge = [&](int u, int v, int tid) {
         auto& local = local_edges[tid].first;
+        if(u > v) std::swap(u, v);
         local.emplace_back(u,v);
         if (local.size() == block_size) {
             flush(local);
@@ -122,7 +144,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 
 
 void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_nodes,
-             const std::vector<std::pair<int, int>> &graph, const std::string &file, bool debugMode) {
+             const std::vector<std::tuple<int, int, int>> &graph, const std::string &file, bool debugMode) {
 
     std::ofstream f{file};
     if(!f.is_open())
@@ -149,8 +171,9 @@ void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_n
         }
     }
     f << '\n';
-    for (auto &edge : graph)
-        f << '\t' << edge.first << "\t-- " << edge.second << ";\n";
+    int u, v, w;
+    for (const auto &[u, v, w] : graph)
+        f << '\t' << u << "\t-- " << v << "[label=\"" << w << "\"];\n";
     f << "}\n";
 }
 

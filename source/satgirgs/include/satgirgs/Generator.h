@@ -58,6 +58,17 @@ SATGIRGS_API std::vector<Node2D> convertToNodes(std::vector<std::vector<double>>
 
 /**
  * @brief
+ *  Removes duplicate edges and replaces them by a weighted edge (weight = number of occurences).
+ *
+ * @param edges
+ *  Edges as pairs of nodes
+ * @return
+ *  Deduplicated edges as tuples (node, node, weight)
+ */
+SATGIRGS_API std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<std::pair<int, int>> &edges);
+
+/**
+ * @brief
  *  Samples edges according to weights and positions.
  *  An edge between node u and v is formed with probability \f$ \left(\frac{w_u w_v / W}{|| x_u - x_v ||^d}\right)^\alpha \f$ or 1.0 if the term exceeds 1.0.
  *
@@ -85,14 +96,14 @@ SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<Nod
  * @param nc_nodes
  *  Non-clause nodes
  * @param graph
- *  An edge list with zero based indices.
+ *  An edge list with zero based indices (tuple: node, node, weight).
  * @param file
  *  The name of the output file.
  * @param debugMode
  *  In debug mode, also output clause nodes.
  */
 SATGIRGS_API void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_nodes,
-        const std::vector<std::pair<int,int>> &graph, const std::string &file, bool debugMode = false);
+        const std::vector<std::tuple<int,int,int>> &graph, const std::string &file, bool debugMode = false);
 
 
 
