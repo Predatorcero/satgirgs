@@ -1,5 +1,5 @@
 
-[![Build Status](https://travis-ci.org/chistopher/girgs.svg)](https://travis-ci.org/chistopher/girgs)
+**Note: This readme does not include documentation for the SATGIRG generator, which will follow soon!**
 
 This project contains an implementation of a linear-time sampling algorithm 
 for geometric inhomogeneous random graphs (GIRG)
@@ -158,3 +158,6 @@ generator.generate(seed);
 
 For details we refer to our example applications in `source/examples/` or the CLI's in `source/cli/`.
 
+# Rendering graphs
+
+To force node positions to those given in the `.dot` file, please use the `neato` or `fdp` renderer instead of the standard `dot` renderer.
