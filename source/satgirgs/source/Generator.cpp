@@ -157,7 +157,7 @@ void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_n
           << "\", pos=\"";
         for (auto d = 0u; d < nc_nodes[i].coord.size(); ++d)
             f << (d == 0 ? "" : ",") << nc_nodes[i].coord[d];
-        f << "\"];\n";
+        f << "!\"];\n";
     }
     f << std::fixed;
     if(debugMode){
@@ -167,7 +167,7 @@ void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_n
             << "\", pos=\"";
             for (auto d = 0u; d < c_nodes[i].coord.size(); ++d)
                 f << (d == 0 ? "" : ",") << c_nodes[i].coord[d];
-            f << "\"];\n";
+            f << "!\"];\n";
         }
     }
     f << '\n';
