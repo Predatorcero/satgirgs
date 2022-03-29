@@ -57,7 +57,6 @@ int main(int argc, char* argv[]) {
             << "\t\t[-n anInt]          // number of vertices (non-clause points)   default 10000\n"
             << "\t\t[-m anInt]          // number of edges (clause points)          default 10000\n"
             << "\t\t[-ple aFloat]       // power law exponent       range (2,3]     default 2.5\n"
-            << "\t\t[-alpha aFloat]     // model parameter          range (1,inf]   default infinity\n"
             << "\t\t[-wseed anInt]      // weight seed                              default 12\n"
             << "\t\t[-ncseed anInt]     // non-clause position seed                 default 130\n"
             << "\t\t[-cseed anInt]      // clause position seed                     default 420\n"
@@ -85,7 +84,6 @@ int main(int argc, char* argv[]) {
     auto n      = !params["n"    ].empty()  ? stoi(params["n"    ]) : 10000;
     auto m      = !params["m"    ].empty()  ? stoi(params["m"    ]) : 10000; // TODO find sensible default and change in usage above
     auto ple    = !params["ple"  ].empty()  ? stod(params["ple"  ]) : 2.5;
-    auto alpha  = !params["alpha"].empty()  ? stod(params["alpha"]) : std::numeric_limits<double>::infinity();
     auto wseed  = !params["wseed"].empty()  ? stoi(params["wseed"]) : 12;
     auto ncseed = !params["ncseed"].empty() ? stoi(params["ncseed"]): 130;
     auto cseed  = !params["cseed"].empty()  ? stoi(params["cseed"]) : 420;
@@ -100,7 +98,6 @@ int main(int argc, char* argv[]) {
     logParam(n, "n");
     logParam(m, "m");
     rangeCheck(ple, 2.0, 3.0, "ple", true, false);
-    rangeCheck(alpha, 1.0, std::numeric_limits<double>::infinity(), "alpha", true);
     logParam(wseed, "wseed");
     logParam(ncseed, "ncseed");
     logParam(cseed, "cseed");
