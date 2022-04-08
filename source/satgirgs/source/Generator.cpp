@@ -61,6 +61,7 @@ std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, s
     return result;
 }
 
+// sort and then collect runs of equal edges
 std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<std::pair<int, int>> &edges){
     std::vector<std::tuple<int,int,int>> new_edges;
     sort(edges.begin(), edges.end());
@@ -126,8 +127,8 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
         }); // ignore first minimum
 
         if(debugMode){
-            // add clause - non-clause edges
-            // offset clauseIndex to distinguish from non-clause indices
+            // add non-clause - clause edges
+            // offset clauseIndex by number of non-clause nodes to distinguish from non-clause indices
             addEdge(nearest->index, nc_nodes.size() + clauseIndex, threadId);
             addEdge(secondNearest->index, nc_nodes.size() + clauseIndex, threadId); 
         } else {

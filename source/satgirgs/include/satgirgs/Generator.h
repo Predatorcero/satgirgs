@@ -33,7 +33,7 @@ SATGIRGS_API std::vector<double> generateWeights(int n, double ple, int weightSe
  * @param n
  *  Size of the graph.
  * @param positionSeed
- *  Seed to sample the positions.
+ *  Seed to sample the positions. Should not be equal to the weight seed.
  *
  * @return
  *  The positions on a torus. All inner vectors have the same length.
@@ -49,7 +49,8 @@ SATGIRGS_API std::vector<std::vector<double>> generatePositions(int n, int dimen
  * @param weights
  *  Node weights (power-law distributed)
  * @param indiceOffset
- *  Offset for incides to distinguish clause and non-clause nodes
+ *  Offset for incides to distinguish clause and non-clause nodes.
+ *  E.g. when converting clause nodes, choose as offset the number of non-clause nodes.
  *
  * @return
  *  Node vector with the positions and weights given.
@@ -70,7 +71,7 @@ SATGIRGS_API std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<s
 /**
  * @brief
  *  Samples edges according to weights and positions.
- *  An edge between node u and v is formed with probability \f$ \left(\frac{w_u w_v / W}{|| x_u - x_v ||^d}\right)^\alpha \f$ or 1.0 if the term exceeds 1.0.
+ *  For each clause node c, an edge between the two non-clause nodes with the smallest weighted distance to c is formed.
  *
  * @param c_nodes
  *  Clause nodes.

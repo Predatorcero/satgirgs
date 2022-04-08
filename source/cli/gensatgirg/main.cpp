@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
 
     cout << "generating clause positions ...\t\t" << flush;
     auto c_positions = satgirgs::generatePositions(m, 2, cseed);
-    std::vector<double> c_pseudoweights(m, 1);
+    std::vector<double> c_pseudoweights(m, 1); // clause nodes all have weight 1 in the model
     auto c_nodes = satgirgs::convertToNodes(c_positions, c_pseudoweights, nc_nodes.size());
     auto t4 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t4 - t3).count() << "ms" << endl;
