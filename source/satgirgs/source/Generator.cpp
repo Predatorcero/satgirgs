@@ -84,7 +84,7 @@ std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<std::pair<int,
 
 // we could make this more efficient using a k-d-tree (refer to https://rosettacode.org/wiki/K-d_tree#C.2B.2B for this)
 std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_nodes,
-        const std::vector<Node2D> &nc_nodes, bool debugMode) {
+        const std::vector<Node2D> &nc_nodes, int k, bool debugMode) {
 
     using edge_vector = std::vector<std::pair<int, int>>;
     edge_vector result;
@@ -119,21 +119,24 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
         auto cp = c_nodes[clauseIndex];
         const auto threadId = omp_get_thread_num();
 
-        auto nearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {return a.weightedDistance(cp) < b.weightedDistance(cp);});
-        auto secondNearest = std::min_element(nc_nodes.begin(), nc_nodes.end(), [&](const Node2D& a, const Node2D& b) {
-            if(a == *nearest) return false;
-            if(b == *nearest) return true;
-            return a.weightedDistance(cp) < b.weightedDistance(cp);
-        }); // ignore first minimum
+        auto sortedNodes = std::vector<Node<2>>(nc_nodes.begin(), nc_nodes.end());
+        std::partial_sort(sortedNodes.begin(), sortedNodes.begin() + k, sortedNodes.end(), [&cp](const Node2D& a, const Node2D& b) {return a.weightedDistance(cp) < b.weightedDistance(cp);});
 
         if(debugMode){
             // add non-clause - clause edges
             // offset clauseIndex by number of non-clause nodes to distinguish from non-clause indices
-            addEdge(nearest->index, nc_nodes.size() + clauseIndex, threadId);
-            addEdge(secondNearest->index, nc_nodes.size() + clauseIndex, threadId); 
+            for (int i = 0; i < k; ++i) {
+                addEdge(sortedNodes[i].index, nc_nodes.size() + clauseIndex, threadId);
+            }
+
         } else {
             // add non-clause - non-clause edges
-            addEdge(nearest->index, secondNearest->index, threadId);
+            for (int i = 0; i < k; ++i) {
+                for (int j = i + 1; j < k; ++j) {
+                    addEdge(sortedNodes[i].index, sortedNodes[j].index, threadId);
+
+                }
+            }
         }
     }
 

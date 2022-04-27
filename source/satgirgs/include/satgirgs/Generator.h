@@ -77,14 +77,16 @@ SATGIRGS_API std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<s
  *  Clause nodes.
  * @param nc_nodes
  *  Non-clause nodes.
+ * @param k
+ *  Literals per clause.
  * @param debugMode
- *  In debug mode, output edges between clause and two closest non-clauses instead of the edges between these non-clauses.
+ *  In debug mode, output edges between clause and k closest non-clauses instead of the edges between these non-clauses.
  *
  * @return
  *  An edge list with zero based indices.
  */
 SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<Node2D>& c_nodes,
-        const std::vector<Node2D> &nc_nodes, bool debugMode = false);
+        const std::vector<Node2D> &nc_nodes, int k, bool debugMode = false);
 
 
 /**
