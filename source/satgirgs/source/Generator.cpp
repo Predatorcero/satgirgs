@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "openmp-use-default-none"
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -6,6 +8,7 @@
 #include <mutex>
 #include <ios>
 #include <tuple>
+#include <set>
 
 #include <omp.h>
 
@@ -84,7 +87,7 @@ std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<std::pair<int,
 
 // we could make this more efficient using a k-d-tree (refer to https://rosettacode.org/wiki/K-d_tree#C.2B.2B for this)
 std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_nodes,
-        const std::vector<Node2D> &nc_nodes, int k, bool debugMode) {
+        const std::vector<Node2D> &nc_nodes, int k, float t, int edgeSeed, bool debugMode) {
 
     using edge_vector = std::vector<std::pair<int, int>>;
     edge_vector result;
@@ -119,21 +122,46 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
         auto cp = c_nodes[clauseIndex];
         const auto threadId = omp_get_thread_num();
 
-        auto sortedNodes = std::vector<Node<2>>(nc_nodes.begin(), nc_nodes.end());
-        std::partial_sort(sortedNodes.begin(), sortedNodes.begin() + k, sortedNodes.end(), [&cp](const Node2D& a, const Node2D& b) {return a.weightedDistance(cp) < b.weightedDistance(cp);});
+        std::vector<Node2D> clauseNodes;
+
+        if (t == 0) {
+            auto sortedNodes = std::vector<Node<2>>(nc_nodes.begin(), nc_nodes.end());
+            std::partial_sort(sortedNodes.begin(), sortedNodes.begin() + k, sortedNodes.end(), [&cp](const Node2D& a, const Node2D& b) {return a.weightedDistance(cp) < b.weightedDistance(cp);});
+            clauseNodes.reserve(k);
+            std::copy(sortedNodes.begin(), sortedNodes.begin() + k, clauseNodes.begin());
+        } else {
+            std::vector<float> nodeWeights(nc_nodes.size());
+            for (int i = 0; i < nc_nodes.size(); ++i) {
+                float nodeWeight = 1; 
+                // TODO Check weighted distance
+                nodeWeights[i] = std::pow(nodeWeight / nc_nodes[i].weightedDistance(cp), 1 / t);
+            }
+
+            const auto tid = omp_get_thread_num();
+            auto gen = std::default_random_engine{edgeSeed >= 0 ? (edgeSeed+tid) : std::random_device()()};
+            auto dist = std::discrete_distribution(nodeWeights.begin(), nodeWeights.end());
+            std::set<int> clauseNodesSet;
+            while (clauseNodesSet.size() < k) {
+                clauseNodesSet.insert(dist(gen));
+            }
+            for (auto clauseNode : clauseNodesSet) {
+                clauseNodes.push_back(nc_nodes[clauseNode]);
+            }
+        }
+
 
         if(debugMode){
             // add non-clause - clause edges
             // offset clauseIndex by number of non-clause nodes to distinguish from non-clause indices
             for (int i = 0; i < k; ++i) {
-                addEdge(sortedNodes[i].index, nc_nodes.size() + clauseIndex, threadId);
+                addEdge(clauseNodes[i].index, nc_nodes.size() + clauseIndex, threadId);
             }
 
         } else {
             // add non-clause - non-clause edges
             for (int i = 0; i < k; ++i) {
                 for (int j = i + 1; j < k; ++j) {
-                    addEdge(sortedNodes[i].index, sortedNodes[j].index, threadId);
+                    addEdge(clauseNodes[i].index, clauseNodes[j].index, threadId);
 
                 }
             }
@@ -182,3 +210,5 @@ void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<Node2D>& nc_n
 }
 
 } // namespace satgirgs
+
+#pragma clang diagnostic pop

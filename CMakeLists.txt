@@ -70,6 +70,7 @@ option(OPTION_SELF_CONTAINED  "Create a self-contained install with all dependen
 option(OPTION_BUILD_TESTS     "Build tests."                                           OFF)
 option(OPTION_BUILD_BENCHMARKS "Build benchmarks."                                     OFF)
 option(OPTION_BUILD_EXAMPLES  "Build examples."                                        OFF)
+option(OPTION_BUILD_EXPERIMENTS  "Build experiments."                                  ON)
 option(OPTION_BUILD_CLI       "Build CLI's."                                           ON)
 option(OPTION_BUILD_DOCS      "Build documentation."                                   OFF)
 option(OPTION_USE_BMI2        "Use PDEP Instruction (requires bmi2 instruction set; SLOW ON AMD)" OFF)

@@ -37,6 +37,12 @@ if(OPTION_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
 
+# Benchmarks
+if(OPTION_BUILD_EXPERIMENTS)
+    set(IDE_FOLDER "Experiments")
+    add_subdirectory(experiments)
+endif()
+
 
 #
 # Deployment
