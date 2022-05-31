@@ -17,22 +17,8 @@
 
 namespace satgirgs {
 
-std::vector<double> generateWeights(int n, double ple, int weightSeed, bool parallel) {
-    const auto threads = parallel ? std::max(1, std::min(omp_get_max_threads(), n / 10000)) : 1;
-    auto result = std::vector<double>(n);
-
-    #pragma omp parallel num_threads(threads)
-    {
-        const auto tid = omp_get_thread_num();
-        auto gen = std::default_random_engine{weightSeed >= 0 ? (weightSeed+tid) : std::random_device()()};
-        auto dist = std::uniform_real_distribution<>{};
-
-        #pragma omp for schedule(static)
-        for (int i = 0; i < n; ++i) {
-            result[i] = std::pow((std::pow(0.5*n, -ple + 1) - 1) * dist(gen) + 1, 1 / (-ple + 1));
-        }
-    }
-
+std::vector<double> generateWeights(int n) {
+    auto result = std::vector<double>(n, 1);
     return result;
 }
 

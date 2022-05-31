@@ -12,19 +12,14 @@ namespace satgirgs {
 
 /**
  * @brief
- *  The weights are sampled according to a power law distribution between [1, n)
+ *  The weights are all equal.
  *
  * @param n
  *  The size of the graph. Should match with size of positions.
- * @param ple
- *  The power law exponent to sample the new weights. Should be 2.0 to h3.0.
- * @param weightSeed
- *  A seed for weight sampling. Should not be equal to the position seed.
- *
  * @return
  *  The weights according to the desired distribution.
  */
-SATGIRGS_API std::vector<double> generateWeights(int n, double ple, int weightSeed, bool parallel = true);
+SATGIRGS_API std::vector<double> generateWeights(int n);
 
 /**
  * @brief

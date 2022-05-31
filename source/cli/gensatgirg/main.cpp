@@ -58,8 +58,6 @@ int main(int argc, char* argv[]) {
             << "\t\t[-m anInt]          // number of edges (clause points)          default 10000\n"
             << "\t\t[-k anInt]          // number literals per clause               default 2\n"
             << "\t\t[-t aFloat]         // temperature                              default 0.5\n"
-            << "\t\t[-ple aFloat]       // power law exponent       range (2,3]     default 2.5\n"
-            << "\t\t[-wseed anInt]      // weight seed                              default 12\n"
             << "\t\t[-ncseed anInt]     // non-clause position seed                 default 130\n"
             << "\t\t[-cseed anInt]      // clause position seed                     default 420\n"
             << "\t\t[-eseed anInt]      // edge seed                                default 567\n"
@@ -88,8 +86,6 @@ int main(int argc, char* argv[]) {
     auto m      = !params["m"    ].empty()  ? stoi(params["m"    ]) : 10000; // TODO find sensible default and change in usage above
     auto k      = !params["k"    ].empty()  ? stoi(params["k"    ]) : 2; // TODO find sensible default and change in usage above
     auto t      = !params["t"    ].empty()  ? stod(params["t"    ]) : 0.5;
-    auto ple    = !params["ple"  ].empty()  ? stod(params["ple"  ]) : 2.5;
-    auto wseed  = !params["wseed"].empty()  ? stoi(params["wseed"]) : 12;
     auto ncseed = !params["ncseed"].empty() ? stoi(params["ncseed"]): 130;
     auto cseed  = !params["cseed"].empty()  ? stoi(params["cseed"]) : 420;
     auto eseed  = !params["eseed"].empty()  ? stoi(params["eseed"]) : 567;
@@ -105,8 +101,6 @@ int main(int argc, char* argv[]) {
     logParam(m, "m");
     logParam(k, "k");
     logParam(t, "t");
-    rangeCheck(ple, 2.0, 3.0, "ple", true, false);
-    logParam(wseed, "wseed");
     logParam(ncseed, "ncseed");
     logParam(cseed, "cseed");
     logParam(eseed, "eseed");
@@ -122,7 +116,7 @@ int main(int argc, char* argv[]) {
 
 
     cout << "generating weights ...\t\t" << flush;
-    auto weights = satgirgs::generateWeights(n, ple, wseed, threads > 1);
+    auto weights = satgirgs::generateWeights(n);
     auto t2 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t2 - t1).count() << "ms\tlargest = ";
     cout << *max_element(weights.begin(), weights.end()) << endl;
