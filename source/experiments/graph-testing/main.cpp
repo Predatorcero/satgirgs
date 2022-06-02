@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
         clog << "rep " << rep << endl;
 
         clog << "shrinking t" << endl;
-        for(auto i : {20.0, 10.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.7, 0.5, 0.3, 0.1, 0.0}) {
+        for(auto i : {2.0, 1.5, 1.0, 0.7, 0.5, 0.3, 0.1, 0.0}) {
             clog << i << endl;
             measure(n, m, k, i, threads, ++seed, 2);
         }

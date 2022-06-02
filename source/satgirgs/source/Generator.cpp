@@ -103,7 +103,11 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
 
     const auto num_threads = omp_get_max_threads();
 
-    #pragma omp parallel for schedule(static), num_threads(num_threads)
+    //const auto tid = omp_get_thread_num();
+    const auto tid = 0;
+    auto gen = std::default_random_engine{edgeSeed >= 0 ? (edgeSeed+tid) : std::random_device()()};
+
+    //#pragma omp parallel for schedule(static), num_threads(num_threads)
     for(int clauseIndex = 0; clauseIndex < c_nodes.size(); clauseIndex++){
         auto cp = c_nodes[clauseIndex];
         const auto threadId = omp_get_thread_num();
@@ -122,9 +126,6 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
                 const int d = 2;
                 nodeWeights[i] = std::pow(nodeWeight / std::pow(nc_nodes[i].distance(cp), d), 1 / t);
             }
-
-            const auto tid = omp_get_thread_num();
-            auto gen = std::default_random_engine{edgeSeed >= 0 ? (edgeSeed+tid) : std::random_device()()};
             /*
             auto dist = std::discrete_distribution(nodeWeights.begin(), nodeWeights.end());
             std::set<int> clauseNodesSet;
