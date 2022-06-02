@@ -1,13 +1,46 @@
 
 #include <iostream>
 #include <cassert>
-#include <limits>
+#include <set>
 
 #include <omp.h>
 #include "satgirgs/Generator.h"
 
 
 using namespace std;
+
+double measureClustering(int n, int m, const vector<pair<int, int>> & edges) {
+    // n = variables
+    // m = clauses
+    // edge IDs: (variable_id, n + clause_id)
+    auto variable_adj = vector<set<int>>(n);
+    auto clause_adj = vector<vector<int>>(m);
+    for (auto [u, v] : edges) {
+        auto variableId = u;
+        auto clauseId = v - n;
+        variable_adj[variableId].insert(clauseId);
+        clause_adj[clauseId].push_back(variableId);
+    }
+    int fourCycles = 0;
+    int fourPaths = 0;
+
+    for (int clauseId = 0; clauseId < m; ++clauseId) {
+        for (int var1 = 0; var1 < clause_adj[clauseId].size(); ++var1) {
+            auto var1Id = clause_adj[clauseId][var1];
+
+            fourPaths += (clause_adj[clauseId].size() - 1) * (variable_adj[var1Id].size() - 1);
+            for (int var2 = var1 + 1; var2 < clause_adj[clauseId].size(); ++var2) {
+                auto var2Id = clause_adj[clauseId][var2];
+                // TODO Optimize
+                std::vector<int> intersection;
+                std::set_intersection(variable_adj[var1Id].begin(), variable_adj[var1Id].end(), variable_adj[var2Id].begin(), variable_adj[var2Id].end(), back_inserter(intersection));
+                fourCycles += intersection.size() - 1;
+            }
+        }
+    }
+    fourCycles /= 2;
+    return fourCycles * 4.f / fourPaths;
+}
 
 
 void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
@@ -26,9 +59,11 @@ void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
     std::vector<double> c_pseudoweights(m, 1); // clause nodes all have weight 1 in the model
     auto c_nodes = satgirgs::convertToNodes(c_positions, c_pseudoweights, nc_nodes.size());
 
-   auto edges = satgirgs::generateEdges(c_nodes, nc_nodes, k, t, eseed, true);
-   auto edgeCount = edges.size();
-   auto variablesPerClause = edgeCount / m;
+    auto edges = satgirgs::generateEdges(c_nodes, nc_nodes, k, t, eseed, true);
+    auto edgeCount = edges.size();
+    auto variablesPerClause = edgeCount / m;
+    clog << "measuring clustering..." << endl;
+    auto clustering = measureClustering(n, m, edges);
 
     cout << n << ','
          << m << ','
@@ -38,27 +73,32 @@ void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
          << seed << ','
          << plot << ','
          << edgeCount << ','
-         << variablesPerClause << '\n';
+         << variablesPerClause << ','
+         << clustering << '\n';
 }
 
 
 int main(int argc, char* argv[]) {
 
-    // cout << "dimension,n,avgDeg,alpha,ple,threads,seed,plot,TimeWeights,TimePositions,TimeBinary,TimePre,TimeEdges,TimeTotal,GenNumEdge,GenAvgDeg\n";
+    cout << "n,m,k,t,threads,seed,plot,edgeCount,variablesPerClause,clustering\n";
 
     int seed = 0;
 
-    auto n = 1<<15;
-    auto m = 1<<10;
-    auto t = 0.5;
-    auto ple = 2.5;
-    auto k=10;
+    auto n = 1000;
+    auto m = 4000;
+    auto k = 3;
     auto threads = 1;
-    auto reps = 10;
+    auto reps = 20;
 
     for(int rep=0; rep<reps; ++rep) {
         clog << "rep " << rep << endl;
 
+        clog << "shrinking t" << endl;
+        for(auto i : {20.0, 10.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.7, 0.5, 0.3, 0.1, 0.0}) {
+            clog << i << endl;
+            measure(n, m, k, i, threads, ++seed, 2);
+        }
+        /*
         clog << "growing n" << endl;
         for(int i = 1<<10; i<= (1<<15); i <<= 1) {
             clog << i << endl;
@@ -72,13 +112,8 @@ int main(int argc, char* argv[]) {
         for(int i = 2; i<= 1<<6; i <<= 1) {
             clog << i << endl;
             measure(n, m, i, t, threads, ++seed, 1);
-        }
+        }*/
 
-        clog << "shrinking t" << endl;
-        for(auto i : {5.0, 4.0, 3.0, 2.0, 1.0, 0.5, 0.0}) {
-            clog << i << endl;
-            measure(n, m, k, i, threads, ++seed, 2);
-        }
     }
 
     return 0;

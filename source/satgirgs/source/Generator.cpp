@@ -118,13 +118,14 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
         } else {
             std::vector<float> nodeWeights(nc_nodes.size());
             for (int i = 0; i < nc_nodes.size(); ++i) {
-                float nodeWeight = 1; 
-                // TODO Check weighted distance
-                nodeWeights[i] = std::pow(nodeWeight / nc_nodes[i].weightedDistance(cp), 1 / t);
+                const float nodeWeight = 1;
+                const int d = 2;
+                nodeWeights[i] = std::pow(nodeWeight / std::pow(nc_nodes[i].distance(cp), d), 1 / t);
             }
 
             const auto tid = omp_get_thread_num();
             auto gen = std::default_random_engine{edgeSeed >= 0 ? (edgeSeed+tid) : std::random_device()()};
+            /*
             auto dist = std::discrete_distribution(nodeWeights.begin(), nodeWeights.end());
             std::set<int> clauseNodesSet;
             while (clauseNodesSet.size() < k) {
@@ -132,6 +133,12 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
             }
             for (auto clauseNode : clauseNodesSet) {
                 clauseNodes.push_back(nc_nodes[clauseNode]);
+            }*/
+            for (int i = 0; i < k; ++i) {
+                auto dist = std::discrete_distribution(nodeWeights.begin(), nodeWeights.end());
+                auto chosenNode = dist(gen);
+                clauseNodes.push_back(nc_nodes[chosenNode]);
+                nodeWeights[chosenNode] = 0;
             }
         }
 
