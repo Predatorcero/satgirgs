@@ -9,7 +9,13 @@
 
 using namespace std;
 
-double measureClustering(int n, int m, const vector<pair<int, int>> & edges) {
+struct Clustering {
+    int fourPaths;
+    int fourCycles;
+    float closedProbability;
+};
+
+Clustering measureClustering(int n, int m, const vector<pair<int, int>> & edges) {
     // n = variables
     // m = clauses
     // edge IDs: (variable_id, n + clause_id)
@@ -39,7 +45,7 @@ double measureClustering(int n, int m, const vector<pair<int, int>> & edges) {
         }
     }
     fourCycles /= 2;
-    return fourCycles * 4.f / fourPaths;
+    return {fourPaths, fourCycles, fourCycles * 4.f / fourPaths};
 }
 
 
@@ -62,7 +68,6 @@ void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
     auto edges = satgirgs::generateEdges(c_nodes, nc_nodes, k, t, eseed, true);
     auto edgeCount = edges.size();
     auto variablesPerClause = edgeCount / m;
-    clog << "measuring clustering..." << endl;
     auto clustering = measureClustering(n, m, edges);
 
     cout << n << ','
@@ -74,29 +79,34 @@ void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
          << plot << ','
          << edgeCount << ','
          << variablesPerClause << ','
-         << clustering << '\n';
+         << clustering.fourPaths << ','
+         << clustering.fourCycles << ','
+         << clustering.closedProbability << '\n';
 }
 
 
 int main(int argc, char* argv[]) {
 
-    cout << "n,m,k,t,threads,seed,plot,edgeCount,variablesPerClause,clustering\n";
+    cout << "n,m,k,t,threads,seed,plot,edgeCount,variablesPerClause,fourPaths,fourCycles,closedProbability\n";
 
     int seed = 0;
 
-    auto n = 1000;
-    auto m = 4000;
+    // auto n = 1000;
+    // auto m = 4000;
     auto k = 3;
     auto threads = 1;
-    auto reps = 20;
+    auto reps = 1;
 
     for(int rep=0; rep<reps; ++rep) {
         clog << "rep " << rep << endl;
 
         clog << "shrinking t" << endl;
-        for(auto i : {2.0, 1.5, 1.0, 0.7, 0.5, 0.3, 0.1, 0.0}) {
-            clog << i << endl;
-            measure(n, m, k, i, threads, ++seed, 2);
+        for(auto t : {1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0}) {
+            for (auto n : {500, 1000, 1500, 2000, 2500, 3000, 3500, 4000}){
+                auto m = 4 * n;
+                clog << "n=" << n <<", m=" << m << endl;
+                measure(n, m, k, t, threads, ++seed, 2);
+            }
         }
         /*
         clog << "growing n" << endl;
