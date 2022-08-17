@@ -17,10 +17,25 @@
 
 namespace satgirgs {
 
-std::vector<double> generateWeights(int n) {
-    auto result = std::vector<double>(n, 1);
+std::vector<double> generateWeights(int n, double ple, int weightSeed, bool parallel) {
+    const auto threads = parallel ? std::max(1, std::min(omp_get_max_threads(), n / 10000)) : 1;
+    auto result = std::vector<double>(n);
+
+    #pragma omp parallel num_threads(threads)
+    {
+        const auto tid = omp_get_thread_num();
+        auto gen = std::default_random_engine{weightSeed >= 0 ? (weightSeed+tid) : std::random_device()()};
+        auto dist = std::uniform_real_distribution<>{};
+
+        #pragma omp for schedule(static)
+        for (int i = 0; i < n; ++i) {
+            result[i] = std::pow((std::pow(0.5*n, -ple + 1) - 1) * dist(gen) + 1, 1 / (-ple + 1));
+        }
+    }
+
     return result;
 }
+
 
 std::vector<std::vector<double>> generatePositions(int n, int dimension, int positionSeed, bool parallel) {
     const auto threads = parallel ? std::max(1, std::min(omp_get_max_threads(), n / 10000)) : 1;
@@ -45,7 +60,7 @@ std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, s
     assert(positions.size() == weights.size());
     std::vector<Node2D> result;
     for(int i = 0; i < positions.size(); i++){
-        result.push_back(Node2D(positions[i], weights[i], indiceOffset + i));
+        result.emplace_back(positions[i], weights[i], indiceOffset + i);
     }
     return result;
 }
@@ -122,7 +137,7 @@ std::vector<std::pair<int, int>> generateEdges(const std::vector<Node2D> &c_node
         } else {
             std::vector<float> nodeWeights(nc_nodes.size());
             for (int i = 0; i < nc_nodes.size(); ++i) {
-                const float nodeWeight = 1;
+                const auto nodeWeight = nc_nodes[i].weight;
                 const int d = 2;
                 nodeWeights[i] = std::pow(nodeWeight / std::pow(nc_nodes[i].distance(cp), d), 1 / t);
             }

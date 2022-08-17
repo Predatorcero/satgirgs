@@ -19,7 +19,7 @@ namespace satgirgs {
  * @return
  *  The weights according to the desired distribution.
  */
-SATGIRGS_API std::vector<double> generateWeights(int n);
+SATGIRGS_API std::vector<double> generateWeights(int n, double ple, int weightSeed, bool parallel = false);
 
 /**
  * @brief

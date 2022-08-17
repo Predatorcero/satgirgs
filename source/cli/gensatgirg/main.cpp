@@ -116,7 +116,8 @@ int main(int argc, char* argv[]) {
 
 
     cout << "generating weights ...\t\t" << flush;
-    auto weights = satgirgs::generateWeights(n);
+    //TODO Fix weights
+    auto weights = satgirgs::generateWeights(n, 3.0, 12345);
     auto t2 = high_resolution_clock::now();
     cout << "done in " << duration_cast<milliseconds>(t2 - t1).count() << "ms\tlargest = ";
     cout << *max_element(weights.begin(), weights.end()) << endl;

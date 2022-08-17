@@ -49,16 +49,17 @@ Clustering measureClustering(int n, int m, const vector<pair<int, int>> & edges)
 }
 
 
-void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
+void measure(int n, int m, int k, float t, float ple, int threads, int seed, int plot) {
 
     omp_set_num_threads(threads);
     assert(threads == omp_get_max_threads());
 
     auto ncseed = seed+ 10000;
     auto cseed = seed + 10001;
+    auto wseed = seed + 10002;
     auto eseed = seed+ 100000;
 
-    auto weights = satgirgs::generateWeights(n);
+    auto weights = satgirgs::generateWeights(n, ple, wseed);
     auto nc_positions = satgirgs::generatePositions(n, 2, ncseed);
     auto nc_nodes = satgirgs::convertToNodes(nc_positions, weights);
     auto c_positions = satgirgs::generatePositions(m, 2, cseed);
@@ -74,6 +75,7 @@ void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
          << m << ','
          << k << ','
          << t << ','
+         << ple << ','
          << threads << ','
          << seed << ','
          << plot << ','
@@ -87,7 +89,7 @@ void measure(int n, int m, int k, float t, int threads, int seed, int plot) {
 
 int main(int argc, char* argv[]) {
 
-    cout << "n,m,k,t,threads,seed,plot,edgeCount,variablesPerClause,fourPaths,fourCycles,closedProbability\n";
+    cout << "n,m,k,t,ple,threads,seed,plot,edgeCount,variablesPerClause,fourPaths,fourCycles,closedProbability\n";
 
     int seed = 0;
 
@@ -96,6 +98,7 @@ int main(int argc, char* argv[]) {
     auto k = 3;
     auto threads = 1;
     auto reps = 1;
+    auto ple = 3.0;
 
     for(int rep=0; rep<reps; ++rep) {
         clog << "rep " << rep << endl;
@@ -105,7 +108,7 @@ int main(int argc, char* argv[]) {
             for (auto n : {500, 1000, 1500, 2000, 2500, 3000, 3500, 4000}){
                 auto m = 4 * n;
                 clog << "n=" << n <<", m=" << m << endl;
-                measure(n, m, k, t, threads, ++seed, 2);
+                measure(n, m, k, t, ple, threads, ++seed, 2);
             }
         }
         /*
