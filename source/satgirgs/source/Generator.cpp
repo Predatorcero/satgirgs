@@ -29,7 +29,8 @@ std::vector<double> generateWeights(int n, double ple, int weightSeed, bool para
 
         #pragma omp for schedule(static)
         for (int i = 0; i < n; ++i) {
-            result[i] = std::pow((std::pow(0.5*n, -ple + 1) - 1) * dist(gen) + 1, 1 / (-ple + 1));
+            //result[i] = std::pow((std::pow(0.5*n, -ple + 1) - 1) * dist(gen) + 1, 1 / (-ple + 1));
+            result[i] = std::pow(i + 1, - 1 / (ple - 1));
         }
     }
 
