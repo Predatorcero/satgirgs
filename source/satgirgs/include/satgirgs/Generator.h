@@ -50,7 +50,7 @@ SATGIRGS_API std::vector<std::vector<double>> generatePositions(int n, int dimen
  * @return
  *  Node vector with the positions and weights given.
  */
-SATGIRGS_API std::vector<Node2D> convertToNodes(std::vector<std::vector<double>> positions, std::vector<double> weights, int indiceOffset = 0);
+template<unsigned int d=2> SATGIRGS_API std::vector<Node<d>> convertToNodes(std::vector<std::vector<double>> positions, std::vector<double> weights, int indexOffset = 0);
 
 /**
  * @brief
@@ -82,8 +82,8 @@ SATGIRGS_API std::vector<std::tuple<int,int,int>> deduplicateEdges(std::vector<s
  * @return
  *  An edge list with zero based indices.
  */
-SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<Node2D>& c_nodes,
-        const std::vector<Node2D> &nc_nodes, int k, float t, int edgeSeed, bool debugMode = false);
+template<unsigned int d=2> SATGIRGS_API std::vector<std::pair<int,int>> generateEdges(const std::vector<Node<d>>& c_nodes,
+        const std::vector<Node<d>> &nc_nodes, int k, float t, int edgeSeed, bool debugMode = false);
 
 
 /**
@@ -108,3 +108,5 @@ SATGIRGS_API void saveDot(const std::vector<Node2D>& c_nodes, const std::vector<
 
 
 } // namespace satgirgs
+
+#include <satgirgs/Generator.inl>

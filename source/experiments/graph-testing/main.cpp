@@ -48,7 +48,7 @@ Clustering measureClustering(int n, int m, const vector<pair<int, int>> & edges)
     return {fourPaths, fourCycles, fourCycles * 4.f / fourPaths};
 }
 
-
+template<unsigned int d>
 void measure(int n, int m, int k, float t, float ple, int threads, int seed, int plot) {
 
     omp_set_num_threads(threads);
@@ -60,18 +60,19 @@ void measure(int n, int m, int k, float t, float ple, int threads, int seed, int
     auto eseed = seed+ 100000;
 
     auto weights = satgirgs::generateWeights(n, ple, wseed);
-    auto nc_positions = satgirgs::generatePositions(n, 2, ncseed);
-    auto nc_nodes = satgirgs::convertToNodes(nc_positions, weights);
-    auto c_positions = satgirgs::generatePositions(m, 2, cseed);
+    auto nc_positions = satgirgs::generatePositions(n, d, ncseed);
+    auto nc_nodes = satgirgs::convertToNodes<d>(nc_positions, weights);
+    auto c_positions = satgirgs::generatePositions(m, d, cseed);
     std::vector<double> c_pseudoweights(m, 1); // clause nodes all have weight 1 in the model
-    auto c_nodes = satgirgs::convertToNodes(c_positions, c_pseudoweights, nc_nodes.size());
+    auto c_nodes = satgirgs::convertToNodes<d>(c_positions, c_pseudoweights, nc_nodes.size());
 
-    auto edges = satgirgs::generateEdges(c_nodes, nc_nodes, k, t, eseed, true);
+    auto edges = satgirgs::generateEdges<d>(c_nodes, nc_nodes, k, t, eseed, true);
     auto edgeCount = edges.size();
     auto variablesPerClause = edgeCount / m;
     auto clustering = measureClustering(n, m, edges);
 
-    cout << n << ','
+    cout << d << ','
+         << n << ','
          << m << ','
          << k << ','
          << t << ','
@@ -83,34 +84,40 @@ void measure(int n, int m, int k, float t, float ple, int threads, int seed, int
          << variablesPerClause << ','
          << clustering.fourPaths << ','
          << clustering.fourCycles << ','
-         << clustering.closedProbability << '\n';
+         << clustering.closedProbability << endl;
 }
 
 
 int main(int argc, char* argv[]) {
 
-    cout << "n,m,k,t,ple,threads,seed,plot,edgeCount,variablesPerClause,fourPaths,fourCycles,closedProbability\n";
+    cout << "d,n,m,k,t,ple,threads,seed,plot,edgeCount,variablesPerClause,fourPaths,fourCycles,closedProbability" << endl;
 
     int seed = 0;
 
-    // auto n = 1000;
-    // auto m = 4000;
+    auto n = 1000;
+    auto m = 4000;
     auto k = 3;
     auto threads = 1;
-    auto reps = 1;
-    auto ple = 3.0;
+    auto reps = 100;
+    auto ple = 2.5;
+    double t = 1.0;
 
-    for(int rep=0; rep<reps; ++rep) {
-        clog << "rep " << rep << endl;
+    for (auto d : {1, 2, 3, 4, 5}) {
+        clog << "d = " << d << endl;
+        for (auto t : {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0}) {
+            clog << "t = " << t << endl;
+            for (int rep = 0; rep < reps; ++rep) {
+                clog << "rep " << rep << endl;
 
-        clog << "shrinking t" << endl;
-        for(auto t : {1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0}) {
-            for (auto n : {500, 1000, 1500, 2000, 2500, 3000, 3500, 4000}){
-                auto m = 4 * n;
-                clog << "n=" << n <<", m=" << m << endl;
-                measure(n, m, k, t, ple, threads, ++seed, 2);
+                switch(d) {
+                    case 1: measure<1>(n, m, k, t, ple, threads, ++seed, 2); break;
+                    case 2: measure<2>(n, m, k, t, ple, threads, ++seed, 2); break;
+                    case 3: measure<3>(n, m, k, t, ple, threads, ++seed, 2); break;
+                    case 4: measure<4>(n, m, k, t, ple, threads, ++seed, 2); break;
+                    case 5: measure<5>(n, m, k, t, ple, threads, ++seed, 2); break;
+                    default:break;
+                }
             }
-        }
         /*
         clog << "growing n" << endl;
         for(int i = 1<<10; i<= (1<<15); i <<= 1) {
@@ -126,7 +133,7 @@ int main(int argc, char* argv[]) {
             clog << i << endl;
             measure(n, m, i, t, threads, ++seed, 1);
         }*/
-
+        }
     }
 
     return 0;
