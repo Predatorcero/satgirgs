@@ -26,7 +26,7 @@ map<string, string> parseArgs(int argc, char** argv) {
             continue;
         std::string arg = argv[i] + 1; // +1 to skip the -
         // advance one additional position if next is used
-        std::string next = (i + 1 < argc ? argv[i++ + 1] : ""); 
+        std::string next = (i + 1 < argc ? argv[i++ + 1] : "");
         params[std::move(arg)] = std::move(next);
     }
     return params;
@@ -42,7 +42,7 @@ template<typename T>
 void rangeCheck(T value, T min, T max, string name, bool lex = false, bool hex = false) {
     if (value < min || value > max || (value == min && lex) || (value == max && hex)) {
         cerr << "ERROR: parameter " << name << " = " << value << " is not in range "
-            << (lex ? "(" : "[") << min << "," << max << (hex ? ")" : "]") << '\n';
+             << (lex ? "(" : "[") << min << "," << max << (hex ? ")" : "]") << '\n';
         exit(1);
     }
     logParam(value, name);
@@ -55,18 +55,18 @@ int main(int argc, char* argv[]) {
     // write help
     if (argc < 2 || 0 == strcmp(argv[1], "--help") || 0 == strcmp(argv[1], "-help")) {
         clog << "usage: ./gengirg\n"
-            << "\t\t[-n anInt]          // number of nodes                          default 10000\n"
-            << "\t\t[-d anInt]          // dimension of geometry    range [1,5]     default 1\n"
-            << "\t\t[-ple aFloat]       // power law exponent       range (2,3]     default 2.5\n"
-            << "\t\t[-alpha aFloat]     // model parameter          range (1,inf]   default infinity\n"
-            << "\t\t[-deg aFloat]       // average degree           range [1,n)     default 10\n"
-            << "\t\t[-wseed anInt]      // weight seed                              default 12\n"
-            << "\t\t[-pseed anInt]      // position seed                            default 130\n"
-            << "\t\t[-sseed anInt]      // sampling seed                            default 1400\n"
-            << "\t\t[-threads anInt]    // number of threads to use                 default 1\n"
-            << "\t\t[-file aString]     // file name for output (w/o ext)           default \"graph\"\n"
-            << "\t\t[-dot 0|1]          // write result as dot (.dot)               default 0\n"
-            << "\t\t[-edge 0|1]         // write result as edgelist (.txt)          default 0\n";
+             << "\t\t[-n anInt]          // number of nodes                          default 10000\n"
+             << "\t\t[-d anInt]          // dimension of geometry    range [1,5]     default 1\n"
+             << "\t\t[-ple aFloat]       // power law exponent                       default 2.5\n"
+             << "\t\t[-alpha aFloat]     // model parameter          range (1,inf]   default infinity\n"
+             << "\t\t[-deg aFloat]       // average degree           range [1,n)     default 10\n"
+             << "\t\t[-wseed anInt]      // weight seed                              default 12\n"
+             << "\t\t[-pseed anInt]      // position seed                            default 130\n"
+             << "\t\t[-sseed anInt]      // sampling seed                            default 1400\n"
+             << "\t\t[-threads anInt]    // number of threads to use                 default 1\n"
+             << "\t\t[-file aString]     // file name for output (w/o ext)           default \"graph\"\n"
+             << "\t\t[-dot 0|1]          // write result as dot (.dot)               default 0\n"
+             << "\t\t[-edge 0|1]         // write result as edgelist (.txt)          default 0\n";
         return 0;
     }
 
@@ -100,7 +100,6 @@ int main(int argc, char* argv[]) {
     cout << "using:\n";
     logParam(n, "n");
     rangeCheck(d, 1, 5, "d");
-    rangeCheck(ple, 2.0, 3.0, "ple", true, false);
     rangeCheck(alpha, 1.0, std::numeric_limits<double>::infinity(), "alpha", true);
     rangeCheck(deg, 1.0, n-1.0, "deg");
     logParam(wseed, "wseed");
