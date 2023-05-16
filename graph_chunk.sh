@@ -35,7 +35,7 @@ do
       sixth_seed=$RANDOM
       seventh_seed=$RANDOM
       #./gensatgirg -n ${n} -m ${m} -ple ${ple_values[i]} -t ${t_values[j]} -wseed ${first_seed} -ncseed ${second_seed} -cseed ${third_seed} -eseed ${fourth_seed} -file "n${n}_m${m}_ple${i}_t${j}_dimensions${d}_wseed${first_seed}_ncseed${second_seed}_cseed${third_seed}_eseed${fourth_seed}_satgirg${k}" -dot 1 -edge 1
-      #./gengirg -n ${n} -ple ${ple_values[i]} -alpha ${alpha_values[j]} -deg ${avg_degree} -wseed ${fifth_seed} -pseed ${sixth_seed} -sseed ${seventh_seed} -file "n${n}_deg${avg_degree}_ple${i}_t${j}_dimensions${d}_wseed${fifth_seed}_pseed${sixth_seed}_sseed${seventh_seed}_girg${k}" -dot 1 -edge 1
+      #./gengirg -n ${n} -d ${d} -ple ${ple_values[i]} -alpha ${alpha_values[j]} -deg ${avg_degree} -wseed ${fifth_seed} -pseed ${sixth_seed} -sseed ${seventh_seed} -file "n${n}_deg${avg_degree}_ple${i}_t${j}_dimensions${d}_wseed${fifth_seed}_pseed${sixth_seed}_sseed${seventh_seed}_girg${k}" -dot 0 -edge 1
 
       combinations[$index]="$i $j $k $first_seed $second_seed $third_seed $fourth_seed $fifth_seed $sixth_seed $seventh_seed"
       index=$((index + 1))
@@ -56,7 +56,7 @@ fifth_seed=${parameters[7]}
 sixth_seed=${parameters[8]}
 seventh_seed=${parameters[9]}
 
-./gensatgirg -n ${n} -m ${m} -ple ${ple_values[i]} -t ${t_values[j]} -wseed ${first_seed} -ncseed ${second_seed} -cseed ${third_seed} -eseed ${fourth_seed} -file "n${n}_m${m}_ple${i}_t${j}_dimensions${d}_wseed${first_seed}_ncseed${second_seed}_cseed${third_seed}_eseed${fourth_seed}_satgirg${k}" -dot 1 -edge 1
-./gengirg -n ${n} -ple ${ple_values[i]} -alpha ${alpha_values[j]} -deg ${avg_degree} -wseed ${fifth_seed} -pseed ${sixth_seed} -sseed ${seventh_seed} -file "n${n}_deg${avg_degree}_ple${i}_t${j}_dimensions${d}_wseed${fifth_seed}_pseed${sixth_seed}_sseed${seventh_seed}_girg${k}" -dot 1 -edge 1
+#./gensatgirg -n ${n} -m ${m} -ple ${ple_values[i]} -t ${t_values[j]} -wseed ${first_seed} -ncseed ${second_seed} -cseed ${third_seed} -eseed ${fourth_seed} -file "n${n}_m${m}_ple${i}_t${j}_dimensions${d}_wseed${first_seed}_ncseed${second_seed}_cseed${third_seed}_eseed${fourth_seed}_satgirg${k}" -dot 1 -edge 1
+#./gengirg -n ${n} -ple ${ple_values[i]} -alpha ${alpha_values[j]} -deg ${avg_degree} -wseed ${fifth_seed} -pseed ${sixth_seed} -sseed ${seventh_seed} -file "n${n}_deg${avg_degree}_ple${i}_t${j}_dimensions${d}_wseed${fifth_seed}_pseed${sixth_seed}_sseed${seventh_seed}_girg${k}" -dot 1 -edge 1
 
 
